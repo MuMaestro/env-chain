@@ -1,0 +1,26 @@
+{
+	"name": "@mumaestor/env-chain",
+	"version": "1.0.0",
+	"author": "Murilo Augusto Maestro",
+	"description": "A simple chainble environment variable parser",
+	"keywords": [],
+	"license": "ISC",
+	"source": "src/index.ts",
+	"main": "dist/main.js",
+	"types": "dist/types.d.ts",
+	"type": "module",
+	"scripts": {
+		"build": "vite build",
+		"prepublish": "pnpm build",
+		"publish": "npm publish"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.7",
+		"node": "^18.20.2",
+		"vite": "^5.2.8",
+		"vite-plugin-dts": "^3.8.2"
+	},
+	"peerDependencies": {
+		"dotenv": "^16.4.5"
+	}
+}
