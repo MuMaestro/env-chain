@@ -1,5 +1,5 @@
 
 export {
 	envChain
-} from './envChain';
+} from './envChain.js';
 

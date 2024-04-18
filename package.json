@@ -1,15 +1,20 @@
 {
 	"name": "@mumaestro/env-chain",
-	"version": "0.0.3",
+	"version": "0.0.5",
 	"author": "Murilo Augusto Maestro",
 	"description": "A simple chainble environment variable parser",
 	"private": false,
 	"keywords": [],
 	"license": "MIT",
-	"source": "src/index.ts",
-	"main": "dist/main.js",
-	"types": "dist/index.d.ts",
 	"type": "module",
+	"exports": {
+		".": {
+			"import": {
+				"default": "./dist/index.js",
+				"types": "./dist/index.d.ts"
+			}
+		}
+	},
 	"scripts": {
 		"build": "vite build",
 		"prepublish": "pnpm build",
@@ -25,6 +30,7 @@
 		"jest": "^29.7.0",
 		"node": "^18.20.2",
 		"ts-jest": "^29.1.2",
+		"typescript": "^5.4.5",
 		"vite": "^5.2.8",
 		"vite-plugin-dts": "^3.8.2",
 		"vite-tsconfig-paths": "^4.3.2"

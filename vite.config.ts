@@ -4,14 +4,14 @@ import dts from 'vite-plugin-dts';
 import tsconfigPaths from 'vite-tsconfig-paths'
 import * as glob from 'glob';
 
-const libEntrys = glob.sync('./src/*.ts');
+const libEntrys = glob.sync('./src/!(*.d).ts');
 
 export default defineConfig({
 	appType: 'custom',
 	plugins: [
 		tsconfigPaths(),
 		dts({
-			logLevel: `info`,
+			tsconfigPath: './tsconfig.build.json',
 			copyDtsFiles: true,
 		})
 	],
@@ -19,7 +19,10 @@ export default defineConfig({
 		lib: {
 			entry: libEntrys,
 			name: '@mumaestro/env-chain',
-			formats: ['cjs']
+			formats: ['es']
 		},
+		rollupOptions: {
+			external: ['dotenv']
+		}
 	},
 }) 

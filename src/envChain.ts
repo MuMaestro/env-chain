@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import { addPropertyToObject } from './addPropertyToObject';
+import { addPropertyToObject } from './addPropertyToObject.js';
 
 export function envChain(options: Parameters<typeof config>[0] = {
 	path: '.env',
@@ -37,7 +37,7 @@ export function envChain(options: Parameters<typeof config>[0] = {
 					if (config?.quiet) return undefined;
 					throw new Error('Missing inherited key');
 				},
-				set(v) {
+				set() {
 					if (config?.quiet) return;
 					throw new Error('Cannot set inherited value');
 				},
@@ -54,12 +54,12 @@ export function envChain(options: Parameters<typeof config>[0] = {
 					if (!descriptor || (descriptor.value === undefined && descriptor.set === undefined)) {
 						return acc;
 					}
-					acc[k] = this[k];
+					(acc as any)[k] = (this as any)[k];
 					return acc;
 				}, {})
 			};
 		},
-	};
+	} as Chainable;
 	Object.defineProperty(newChain, 'add', { enumerable: false, writable: false, value: newChain.add });
 	Object.defineProperty(newChain, 'inherit', { enumerable: false, writable: false, value: newChain.inherit });
 	Object.defineProperty(newChain, 'remove', { enumerable: false, writable: false, value: newChain.remove });
