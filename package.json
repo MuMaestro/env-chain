@@ -1,10 +1,11 @@
 {
 	"name": "@mumaestro/env-chain",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"author": "Murilo Augusto Maestro",
 	"description": "A simple chainble environment variable parser",
+	"private": false,
 	"keywords": [],
-	"license": "ISC",
+	"license": "MIT",
 	"source": "src/index.ts",
 	"main": "dist/main.js",
 	"types": "dist/index.d.ts",
