@@ -1,8 +1,6 @@
 import { config } from 'dotenv';
 import { addPropertyToObject } from './addPropertyToObject';
-import type { Chainable } from './Chainable';
 
-export { Chainable }
 export function envChain(options: Parameters<typeof config>[0] = {
 	path: '.env',
 }): Chainable {

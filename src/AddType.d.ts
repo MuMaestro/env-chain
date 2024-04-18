@@ -1,7 +1,4 @@
-import type { AccWithoutChainOpts, Chainable } from "./Chainable";
-import type { Flatten } from "./Flatten";
-
-export type AddType<Acc> = <
+type AddType<Acc> = <
 	K extends string,
 	V extends string | ((v: string | undefined, ctx: AccWithoutChainOpts<Acc>) => any)
 >(key: K, value?: V) => Chainable<

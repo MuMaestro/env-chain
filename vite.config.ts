@@ -10,12 +10,16 @@ export default defineConfig({
 	appType: 'custom',
 	plugins: [
 		tsconfigPaths(),
-		dts()
+		dts({
+			logLevel: `info`,
+			copyDtsFiles: true,
+		})
 	],
 	build: {
 		lib: {
 			entry: libEntrys,
 			name: '@mumaestro/env-chain',
+			formats: ['cjs']
 		},
 	},
 }) 
