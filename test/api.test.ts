@@ -1,5 +1,6 @@
 import { test, expect, describe, beforeEach, it } from '@jest/globals';
-import { envChain, type Chainable } from '../src/index';
+import { envChain } from '../src/envChain';
+import { type Chainable } from '../src/Chainable';
 import { afterEach } from 'node:test';
 
 const validEnvConfig = { path: 'test/.env.example' };
