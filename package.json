@@ -1,5 +1,5 @@
 {
-	"name": "@mumaestor/env-chain",
+	"name": "@mumaestro/env-chain",
 	"version": "1.0.0",
 	"author": "Murilo Augusto Maestro",
 	"description": "A simple chainble environment variable parser",
@@ -7,7 +7,7 @@
 	"license": "ISC",
 	"source": "src/index.ts",
 	"main": "dist/main.js",
-	"types": "dist/types.d.ts",
+	"types": "dist/index.d.ts",
 	"type": "module",
 	"scripts": {
 		"build": "vite build",
