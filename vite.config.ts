@@ -1,6 +1,10 @@
+import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import tsconfigPaths from 'vite-tsconfig-paths'
+import * as glob from 'glob';
+
+const libEntrys = glob.sync('./src/*.ts');
 
 export default defineConfig({
 	appType: 'custom',
@@ -10,13 +14,8 @@ export default defineConfig({
 	],
 	build: {
 		lib: {
-			entry: [
-				'src/index.ts',
-			],
+			entry: libEntrys,
 			name: '@mumaestro/env-chain',
-		},
-		rollupOptions: {
-			// external: ['dotenv']
 		},
 	},
 }) 
