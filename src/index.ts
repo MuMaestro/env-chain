@@ -1,8 +1,9 @@
 import { config } from 'dotenv';
 
-export type Flatten<T> = T extends number ? T : T extends object ? {
-	[K in keyof T]: Flatten<T[K]>;
-} : T;
+export type Flatten<T> =
+	T extends number
+	? T
+	: T extends object ? { [K in keyof T]: Flatten<T[K]>; } : T;
 
 export type DefaultValue<ChainEnv> = string | ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => any);
 
@@ -14,10 +15,12 @@ type IncludeInChainWithFunction<
 	Flatten<
 		(K extends keyof ChainEnv ? Omit<ChainEnv, K> : ChainEnv) &
 		{
-			[k in K]: V extends ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => infer R)
+			[k in K]:
+			V extends undefined
+			? (never)
+			: V extends ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => infer R)
 			? R
-			: V extends undefined ? string | undefined : 
-			V extends string ? string | V : V;
+			: V extends string ? string : V;
 		}
 	>
 >;
@@ -34,7 +37,7 @@ export type AliasOperator<ChainEnv> = <
 	D extends string,
 	V extends DefaultValue<ChainEnv>,
 >(key: K, envVariable: D, defaultValue?: V) =>
-	IncludeInChainWithFunction<ChainEnv, K, D>;
+	IncludeInChainWithFunction<ChainEnv, K, V>;
 
 export type InheritConfig = {
 	quiet?: boolean;
@@ -55,12 +58,15 @@ export type RemoveOperator<ChainEnv> = <K extends keyof ChainEnv>(key: K) => Cha
 
 export type RenderOperator<ChainEnv> = () => Flatten<ChainEnv>;
 
+export type CloneOperator<ChainEnv> = () => ChainableEnv<Flatten<ChainEnv>>;
+
 export type ChainableEnvOperators<ChainEnv = {}> = {
 	readonly add: AddOperator<ChainEnv>;
 	readonly alias: AliasOperator<ChainEnv>;
 	readonly inherit: InheritOperator<ChainEnv>;
 	readonly remove: RemoveOperator<ChainEnv>;
 	readonly render: RenderOperator<ChainEnv>;
+	readonly clone: CloneOperator<ChainEnv>;
 };
 
 export type ChainEnvWithoutOperators<ChainEnv> = Omit<Flatten<ChainEnv>, keyof ChainableEnvOperators<Flatten<ChainEnv>>>;
@@ -112,13 +118,19 @@ export function envChain(options: Parameters<typeof config>[0] = {
 				}, {})
 			};
 		},
+		clone() {
+			const newChain = envChain(options)
+			return Object.assign(newChain, this);
+		},
 	} as ChainableEnv;
-	Object.defineProperty(newChain, 'add', { enumerable: false, writable: false, value: newChain.add });
-	Object.defineProperty(newChain, 'alias', { enumerable: false, writable: false, value: newChain.add });
-	Object.defineProperty(newChain, 'inherit', { enumerable: false, writable: false, value: newChain.inherit });
-	Object.defineProperty(newChain, 'remove', { enumerable: false, writable: false, value: newChain.remove });
-	Object.defineProperty(newChain, 'render', { enumerable: false, writable: false, value: newChain.render });
+	freezeOperators(newChain);
 	return newChain;
+}
+
+function freezeOperators(newChain: ChainableEnv<{}>) {
+	Object.keys(newChain).forEach((key) => {
+		Object.defineProperty(newChain, key, { enumerable: false, writable: false });
+	});
 }
 
 function addKeyWithDefaultValue<ChainEnv, V>(
