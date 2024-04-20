@@ -217,5 +217,25 @@ describe('envChain', () => {
 			expect(chain.ALIAS_VARIABLE_1).toBe('variable_1');
 		})
 	});
+
+	describe('clone', () => {
+		let env = envChain(validEnvConfig);
+
+		beforeEach(() => {
+			env = envChain(validEnvConfig);
+		});
+
+		test('chain does not interfere with original chain', async () => {
+			const chain = env.add('UNKNOWN_VARIABLE', 'test').add('VARIABLE_1', 'test_1');
+			const clone = chain.clone().add('VARIABLE_2', 'test_2');
+			clone.UNKNOWN_VARIABLE = 'another_test';
+			expect(clone).not.toEqual(chain);
+			expect(clone.UNKNOWN_VARIABLE).toBe('another_test');
+			expect(chain.UNKNOWN_VARIABLE).not.toBe('another_test');
+			expect(clone.VARIABLE_1).toBe('variable_1');
+			expect(clone.VARIABLE_2).toBe('variable_2');
+			expect((chain as any).VARIABLE_2).not.toBeDefined();
+		})
+	})
 })
 
