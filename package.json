@@ -1,6 +1,6 @@
 {
 	"name": "@mumaestro/env-chain",
-	"version": "0.0.9",
+	"version": "0.1.0",
 	"author": "Murilo Augusto Maestro",
 	"description": "A simple chainble environment variable parser",
 	"private": false,
@@ -8,10 +8,10 @@
 	"license": "MIT",
 	"exports": {
 		".": {
-			"types": "./dist/types/lib.d.ts",
-			"require": "./dist/cjs/lib.js",
-			"import": "./dist/esm/lib.js",
-			"default": "./dist/esm/lib.js"
+			"types": "./dist/types/index.d.ts",
+			"require": "./dist/cjs/index.js",
+			"import": "./dist/esm/index.js",
+			"default": "./dist/esm/index.js"
 		}
 	},
 	"scripts": {
