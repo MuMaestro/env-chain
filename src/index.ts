@@ -4,16 +4,37 @@ export type Flatten<T> = T extends number ? T : T extends object ? {
 	[K in keyof T]: Flatten<T[K]>;
 } : T;
 
-export type AddOperator<ChainEnv> = <
+export type DefaultValue<ChainEnv> = string | ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => any);
+
+type IncludeInChainWithFunction<
+	ChainEnv,
 	K extends string,
-	V extends string | ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => any)
->(key: K, defaultValue?: V) => ChainableEnv<
+	V extends DefaultValue<ChainEnv>
+> = ChainableEnv<
 	Flatten<
-		(K extends keyof ChainEnv ? Omit<ChainEnv, K> : ChainEnv) & {
-			[k in K]: V extends ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => infer R) ? R : V | string;
+		(K extends keyof ChainEnv ? Omit<ChainEnv, K> : ChainEnv) &
+		{
+			[k in K]: V extends ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => infer R)
+			? R
+			: V extends undefined ? string | undefined : 
+			V extends string ? string | V : V;
 		}
 	>
 >;
+
+export type AddOperator<ChainEnv> = <
+	K extends string,
+	V extends DefaultValue<ChainEnv>
+>(key: K, defaultValue?: V) =>
+	IncludeInChainWithFunction<ChainEnv, K, V>;
+
+
+export type AliasOperator<ChainEnv> = <
+	K extends string,
+	D extends string,
+	V extends DefaultValue<ChainEnv>,
+>(key: K, envVariable: D, defaultValue?: V) =>
+	IncludeInChainWithFunction<ChainEnv, K, D>;
 
 export type InheritConfig = {
 	quiet?: boolean;
@@ -36,6 +57,7 @@ export type RenderOperator<ChainEnv> = () => Flatten<ChainEnv>;
 
 export type ChainableEnvOperators<ChainEnv = {}> = {
 	readonly add: AddOperator<ChainEnv>;
+	readonly alias: AliasOperator<ChainEnv>;
 	readonly inherit: InheritOperator<ChainEnv>;
 	readonly remove: RemoveOperator<ChainEnv>;
 	readonly render: RenderOperator<ChainEnv>;
@@ -64,22 +86,10 @@ export function envChain(options: Parameters<typeof config>[0] = {
 	config(options);
 	const newChain: ChainableEnv<{}> = {
 		add(key, defaultValue) {
-			let internalValue = undefined as typeof defaultValue | undefined;
-			return addPropertyToObject(this, key, {
-				get() {
-					if (typeof internalValue === 'function') {
-						return internalValue(process.env[key], this);
-					}
-					if (internalValue) return internalValue;
-					if (typeof defaultValue === 'function') {
-						return defaultValue(process.env[key], this);
-					}
-					return process.env[key] ?? defaultValue;
-				},
-				set(v: typeof internalValue) {
-					internalValue = v;
-				},
-			});
+			return addKeyWithDefaultValue(this, key, defaultValue);
+		},
+		alias(key, envVariable, defaultValue) {
+			return addKeyWithDefaultValue(this, key, defaultValue, envVariable);
 		},
 		inherit(key, from, config) {
 			if (key in this) {
@@ -118,8 +128,33 @@ export function envChain(options: Parameters<typeof config>[0] = {
 		},
 	} as ChainableEnv;
 	Object.defineProperty(newChain, 'add', { enumerable: false, writable: false, value: newChain.add });
+	Object.defineProperty(newChain, 'alias', { enumerable: false, writable: false, value: newChain.add });
 	Object.defineProperty(newChain, 'inherit', { enumerable: false, writable: false, value: newChain.inherit });
 	Object.defineProperty(newChain, 'remove', { enumerable: false, writable: false, value: newChain.remove });
 	Object.defineProperty(newChain, 'render', { enumerable: false, writable: false, value: newChain.render });
 	return newChain;
 }
+function addKeyWithDefaultValue<ChainEnv, V>(
+	context: ChainableEnv<ChainEnv>,
+	key: string,
+	defaultValue: V | undefined,
+	envKey = key
+) {
+	let internalValue = undefined as typeof defaultValue | undefined;
+	return addPropertyToObject(context, key, {
+		get() {
+			if (typeof internalValue === 'function') {
+				return internalValue(process.env[envKey], this);
+			}
+			if (internalValue) return internalValue;
+			if (typeof defaultValue === 'function') {
+				return defaultValue(process.env[envKey], this);
+			}
+			return process.env[envKey] ?? defaultValue;
+		},
+		set(v: typeof internalValue) {
+			internalValue = v;
+		},
+	});
+}
+
