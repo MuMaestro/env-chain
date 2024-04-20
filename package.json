@@ -1,6 +1,6 @@
 {
 	"name": "@mumaestro/env-chain",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"author": "Murilo Augusto Maestro",
 	"description": "A simple chainble environment variable parser",
 	"private": false,
@@ -9,18 +9,16 @@
 	"type": "module",
 	"exports": {
 		".": {
-			"import": {
-				"default": "./dist/index.js",
-				"types": "./dist/index.d.ts"
-			},
-			"require": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
+			"types": "./dist/types/lib.d.ts",
+			"require": "./dist/cjs/lib.js",
+			"import": "./dist/esm/lib.js",
+			"default": "./dist/esm/lib.js"
 		}
 	},
 	"scripts": {
-		"build": "vite build",
+		"build:tscompile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+		"build:clean": "rm -rf ./build",
+		"build": "pnpm build:clean && pnpm build:tscompile",
 		"prepublish": "pnpm build",
 		"test": "jest"
 	},

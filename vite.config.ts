@@ -21,7 +21,7 @@ export default defineConfig({
 			entry: libEntrys,
 			name: '@mumaestro/env-chain',
 			fileName: 'index',
-			formats: ['es'],
+			formats: ['es', 'cjs'],
 		},
 		// rollupOptions: {
 		// 	external: ['dotenv']
