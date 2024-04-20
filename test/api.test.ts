@@ -203,5 +203,19 @@ describe('envChain', () => {
 			expect((chain.render() as any).add).toBeUndefined();
 		})
 	});
+
+	describe('alias', () => {
+		let env = envChain(validEnvConfig);
+
+		beforeEach(() => {
+			env = envChain(validEnvConfig);
+		});
+
+		test('alias a variable', async () => {
+			const chain = env
+				.alias('ALIAS_VARIABLE_1', 'VARIABLE_1');
+			expect(chain.ALIAS_VARIABLE_1).toBe('variable_1');
+		})
+	});
 })
 
