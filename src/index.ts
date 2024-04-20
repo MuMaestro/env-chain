@@ -4,13 +4,13 @@ export type Flatten<T> = T extends number ? T : T extends object ? {
 	[K in keyof T]: Flatten<T[K]>;
 } : T;
 
-export type AddType<Acc> = <
+export type AddOperator<ChainEnv> = <
 	K extends string,
-	V extends string | ((v: string | undefined, ctx: AccWithoutChainOpts<Acc>) => any)
->(key: K, defaultValue?: V) => Chainable<
+	V extends string | ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => any)
+>(key: K, defaultValue?: V) => ChainableEnv<
 	Flatten<
-		(K extends keyof Acc ? Omit<Acc, K> : Acc) & {
-			[k in K]: V extends ((v: string | undefined, ctx: AccWithoutChainOpts<Acc>) => infer R) ? R : V | string;
+		(K extends keyof ChainEnv ? Omit<ChainEnv, K> : ChainEnv) & {
+			[k in K]: V extends ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => infer R) ? R : V | string;
 		}
 	>
 >;
@@ -19,31 +19,30 @@ export type InheritConfig = {
 	quiet?: boolean;
 };
 
-export type InheritType<Acc> = <
+export type InheritOperator<ChainEnv> = <
 	K extends string,
-	V extends keyof Acc
->(key: K, from: V, config?: InheritConfig) => Chainable<
+	V extends keyof ChainEnv
+>(key: K, from: V, config?: InheritConfig) => ChainableEnv<
 	Flatten<
-		Acc & {
-			[k in K]: Acc[V] | undefined;
+		ChainEnv & {
+			[k in K]: ChainEnv[V] | undefined;
 		}
 	>
 >;
 
-export type RemoveType<Acc> = <K extends keyof Acc>(key: K) => Chainable<Flatten<Omit<Acc, K>>>;
+export type RemoveOperator<ChainEnv> = <K extends keyof ChainEnv>(key: K) => ChainableEnv<Flatten<Omit<ChainEnv, K>>>;
 
-export type RenderType<Acc> = () => Flatten<Acc>;
+export type RenderOperator<ChainEnv> = () => Flatten<ChainEnv>;
 
-
-export type ChainableOpts<Acc = {}> = {
-	readonly add: AddType<Acc>;
-	readonly inherit: InheritType<Acc>;
-	readonly remove: RemoveType<Acc>;
-	readonly render: RenderType<Acc>;
+export type ChainableEnvOperators<ChainEnv = {}> = {
+	readonly add: AddOperator<ChainEnv>;
+	readonly inherit: InheritOperator<ChainEnv>;
+	readonly remove: RemoveOperator<ChainEnv>;
+	readonly render: RenderOperator<ChainEnv>;
 };
 
-export type AccWithoutChainOpts<Acc> = Omit<Flatten<Acc>, keyof ChainableOpts<Flatten<Acc>>>;
-export type Chainable<Acc = {}> = AccWithoutChainOpts<Acc> & ChainableOpts<Acc>;
+export type ChainEnvWithoutOperators<ChainEnv> = Omit<Flatten<ChainEnv>, keyof ChainableEnvOperators<Flatten<ChainEnv>>>;
+export type ChainableEnv<ChainEnv = {}> = ChainEnvWithoutOperators<ChainEnv> & ChainableEnvOperators<ChainEnv>;
 
 export function addPropertyToObject<T = {}>(
 	obj: T,
@@ -61,9 +60,9 @@ export function addPropertyToObject<T = {}>(
 
 export function envChain(options: Parameters<typeof config>[0] = {
 	path: '.env',
-}): Chainable {
+}): ChainableEnv {
 	config(options);
-	const newChain: Chainable<{}> = {
+	const newChain: ChainableEnv<{}> = {
 		add(key, defaultValue) {
 			let internalValue = undefined as typeof defaultValue | undefined;
 			return addPropertyToObject(this, key, {
@@ -117,7 +116,7 @@ export function envChain(options: Parameters<typeof config>[0] = {
 				}, {})
 			};
 		},
-	} as Chainable;
+	} as ChainableEnv;
 	Object.defineProperty(newChain, 'add', { enumerable: false, writable: false, value: newChain.add });
 	Object.defineProperty(newChain, 'inherit', { enumerable: false, writable: false, value: newChain.inherit });
 	Object.defineProperty(newChain, 'remove', { enumerable: false, writable: false, value: newChain.remove });
