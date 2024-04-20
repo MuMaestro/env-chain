@@ -66,20 +66,6 @@ export type ChainableEnvOperators<ChainEnv = {}> = {
 export type ChainEnvWithoutOperators<ChainEnv> = Omit<Flatten<ChainEnv>, keyof ChainableEnvOperators<Flatten<ChainEnv>>>;
 export type ChainableEnv<ChainEnv = {}> = ChainEnvWithoutOperators<ChainEnv> & ChainableEnvOperators<ChainEnv>;
 
-export function addPropertyToObject<T = {}>(
-	obj: T,
-	key: string,
-	config: Parameters<typeof Object.defineProperty<T>>[2]
-): T {
-	Object.defineProperty(obj, key, {
-		enumerable: true,
-		configurable: true,
-		...config,
-	});
-	return obj;
-}
-
-
 export function envChain(options: Parameters<typeof config>[0] = {
 	path: '.env',
 }): ChainableEnv {
@@ -134,6 +120,7 @@ export function envChain(options: Parameters<typeof config>[0] = {
 	Object.defineProperty(newChain, 'render', { enumerable: false, writable: false, value: newChain.render });
 	return newChain;
 }
+
 function addKeyWithDefaultValue<ChainEnv, V>(
 	context: ChainableEnv<ChainEnv>,
 	key: string,
@@ -156,5 +143,18 @@ function addKeyWithDefaultValue<ChainEnv, V>(
 			internalValue = v;
 		},
 	});
+}
+
+export function addPropertyToObject<T = {}>(
+	obj: T,
+	key: string,
+	config: Parameters<typeof Object.defineProperty<T>>[2]
+): T {
+	Object.defineProperty(obj, key, {
+		enumerable: true,
+		configurable: true,
+		...config,
+	});
+	return obj;
 }
 

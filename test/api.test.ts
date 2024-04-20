@@ -1,12 +1,11 @@
-import { test, expect, describe, beforeEach, it } from '@jest/globals';
-import { envChain } from '../src/envChain';
-import { afterEach } from 'node:test';
+import { envChain } from '../src/index';
+import { beforeEach, describe, expect, test } from '@jest/globals';
 
 const validEnvConfig = { path: 'test/.env.example' };
 
 describe('envChain', () => {
 	describe('populates process.env', () => {
-		let env: Chainable<{}> = envChain(validEnvConfig);
+		let env = envChain(validEnvConfig);
 
 		beforeEach(() => {
 			env = envChain(validEnvConfig);
@@ -18,14 +17,14 @@ describe('envChain', () => {
 	})
 
 	describe('adding a variable', () => {
-		let env: Chainable<{}> = envChain(validEnvConfig);
+		let env = envChain(validEnvConfig);
 
 		beforeEach(() => {
 			env = envChain(validEnvConfig);
 		});
 
 		describe('gets value of variable can get value', () => {
-			let env: Chainable<{}> = envChain(validEnvConfig);
+			let env = envChain(validEnvConfig);
 
 			beforeEach(() => {
 				env = envChain(validEnvConfig);
@@ -63,12 +62,14 @@ describe('envChain', () => {
 		test('can redefine same variable', async () => {
 			const chain = env
 				.add('VARIABLE_1', 'test')
-				.add('VARIABLE_1', () => 10);
+				.add('VARIABLE_1', () => 10)
+				// .alias('VARIABLE_1', 'AUTH_VARIABLE_1')
+				// .group('auth', (g) => g.add('VARIABLE_1', 'test'));
 			expect(chain.VARIABLE_1).toBe(10);
 		})
 
 		describe('inheriting another variable', () => {
-			let env: Chainable<{}> = envChain(validEnvConfig);
+			let env = envChain(validEnvConfig);
 
 			beforeEach(() => {
 				env = envChain(validEnvConfig);
@@ -98,11 +99,19 @@ describe('envChain', () => {
 					.add('VARIABLE_1', 'test');
 				expect(() => (chain as any).inherit('VARIABLE_1', 'VARIABLE_1')).toThrow();
 			});
+
+			test('value changes when original changes', async () => {
+				const chain = env
+					.add('UNKNOW_VARIABLE', 'test')
+					.inherit('VARIABLE_2', 'UNKNOW_VARIABLE');
+				chain.UNKNOW_VARIABLE = 'another_test';
+				expect(chain.VARIABLE_2).toBe('another_test');
+			})
 		})
 	})
 
 	describe('removing a variable', () => {
-		let env: Chainable<{}> = envChain(validEnvConfig);
+		let env = envChain(validEnvConfig);
 
 		beforeEach(() => {
 			env = envChain(validEnvConfig);
@@ -141,7 +150,7 @@ describe('envChain', () => {
 	});
 
 	describe('rendering', () => {
-		let env: Chainable<{}> = envChain(validEnvConfig);
+		let env = envChain(validEnvConfig);
 
 		beforeEach(() => {
 			env = envChain(validEnvConfig);
