@@ -3,33 +3,35 @@ import { config } from 'dotenv';
 export type Flatten<T> =
 	T extends number
 	? T
-	: T extends object ? { [K in keyof T]: Flatten<T[K]>; } : T;
+	: T extends object
+	? T extends ChainableEnv<infer R>
+	? ChainableEnv<Flatten<R>>
+	: { [K in keyof T]: Flatten<T[K]>; } : T;
 
-export type DefaultValue<ChainEnv> = string | ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => any);
+export type DefaultValue<ChainEnv> = 
+	string | ChainableEnv<ChainEnv> | ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => any) | undefined;
 
 type IncludeInChainWithFunction<
 	ChainEnv,
 	K extends string,
-	V extends DefaultValue<ChainEnv>
-> = ChainableEnv<
-	Flatten<
-		(K extends keyof ChainEnv ? Omit<ChainEnv, K> : ChainEnv) &
-		{
-			[k in K]:
-			V extends undefined
-			? (never)
-			: V extends ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => infer R)
-			? R
-			: V extends string ? string : V;
-		}
-	>
->;
+	V = DefaultValue<ChainEnv>
+> = (K extends keyof ChainEnv ? Omit<ChainEnv, K> : ChainEnv) & {
+	[k in K]: V extends string ? string
+	: V extends ChainableEnv<infer R> ? ChainableEnv<Flatten<R>>
+	: V extends ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => infer R) ? R
+	: V extends undefined ? string | undefined
+	: V;
+};
 
 export type AddOperator<ChainEnv> = <
 	K extends string,
 	V extends DefaultValue<ChainEnv>
 >(key: K, defaultValue?: V) =>
-	IncludeInChainWithFunction<ChainEnv, K, V>;
+	ChainableEnv<
+		Flatten<
+			IncludeInChainWithFunction<ChainEnv, K, V>
+		>
+	>;
 
 
 export type AliasOperator<ChainEnv> = <
@@ -37,7 +39,23 @@ export type AliasOperator<ChainEnv> = <
 	D extends string,
 	V extends DefaultValue<ChainEnv>,
 >(key: K, envVariable: D, defaultValue?: V) =>
-	IncludeInChainWithFunction<ChainEnv, K, V>;
+	ChainableEnv<
+		Flatten<
+			IncludeInChainWithFunction<ChainEnv, K, V>
+		>
+	>;
+
+
+export type GroupOperator<ChainEnv> = <
+	K extends string,
+	GroupChainEnv,
+	GroupChainableEnv = ChainableEnv<Flatten<GroupChainEnv>>,
+>(key: K, groupCreateFunction: (envChain: ChainableEnv) => GroupChainableEnv) =>
+	ChainableEnv<
+		Flatten<
+			IncludeInChainWithFunction<ChainEnv, K, GroupChainableEnv>
+		>
+	>;
 
 export type InheritConfig = {
 	quiet?: boolean;
@@ -64,6 +82,7 @@ export type ChainableEnvOperators<ChainEnv = {}> = {
 	readonly add: AddOperator<ChainEnv>;
 	readonly alias: AliasOperator<ChainEnv>;
 	readonly inherit: InheritOperator<ChainEnv>;
+	readonly group: GroupOperator<ChainEnv>;
 	readonly remove: RemoveOperator<ChainEnv>;
 	readonly render: RenderOperator<ChainEnv>;
 	readonly clone: CloneOperator<ChainEnv>;
@@ -82,6 +101,17 @@ export function envChain(options: Parameters<typeof config>[0] = {
 		},
 		alias(key, envVariable, defaultValue) {
 			return addKeyWithDefaultValue(this, key, defaultValue, envVariable);
+		},
+		group(k, groupCreateFunction) {
+			const groupChain = groupCreateFunction(envChain(options));
+			return addPropertyToObject(this, k, {
+				get() {
+					return groupChain;
+				},
+				set() {
+					throw new Error('Cannot set group value');
+				},
+			});
 		},
 		inherit(key, from, config) {
 			if (key in this) {

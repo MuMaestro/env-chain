@@ -63,8 +63,8 @@ describe('envChain', () => {
 			const chain = env
 				.add('VARIABLE_1', 'test')
 				.add('VARIABLE_1', () => 10)
-				// .alias('VARIABLE_1', 'AUTH_VARIABLE_1')
-				// .group('auth', (g) => g.add('VARIABLE_1', 'test'));
+			// .alias('VARIABLE_1', 'AUTH_VARIABLE_1')
+			// .group('auth', (g) => g.add('VARIABLE_1', 'test'));
 			expect(chain.VARIABLE_1).toBe(10);
 		})
 
@@ -235,6 +235,20 @@ describe('envChain', () => {
 			expect(clone.VARIABLE_1).toBe('variable_1');
 			expect(clone.VARIABLE_2).toBe('variable_2');
 			expect((chain as any).VARIABLE_2).not.toBeDefined();
+		})
+	})
+
+	describe('group', () => {
+		let env = envChain(validEnvConfig);
+
+		beforeEach(() => {
+			env = envChain(validEnvConfig);
+		});
+
+		test('creates subchain', () => {
+			const chain = env
+				.add('VARIABLE_1', 'test').group('auth', (g) => g.add('VARIABLE_2', 'test'));
+			expect(chain.auth.VARIABLE_2).toBe('variable_2');
 		})
 	})
 })
