@@ -1,6 +1,6 @@
 {
 	"name": "@mumaestro/env-chain",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"author": "Murilo Augusto Maestro",
 	"description": "A simple chainble environment variable parser",
 	"private": false,
@@ -12,6 +12,10 @@
 			"import": {
 				"default": "./dist/index.js",
 				"types": "./dist/index.d.ts"
+			},
+			"require": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
 			}
 		}
 	},

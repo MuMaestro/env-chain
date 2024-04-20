@@ -2,5 +2,5 @@ test
 tests
 jest.*
 vite.*
-node_modules.*
-src.*
+node_modules*
+src*

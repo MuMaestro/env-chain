@@ -12,17 +12,19 @@ export default defineConfig({
 		tsconfigPaths(),
 		dts({
 			tsconfigPath: './tsconfig.build.json',
-			copyDtsFiles: true,
+			rollupTypes: true,
+			strictOutput: true,
 		})
 	],
 	build: {
 		lib: {
 			entry: libEntrys,
 			name: '@mumaestro/env-chain',
-			formats: ['es']
+			fileName: 'index',
+			formats: ['es'],
 		},
-		rollupOptions: {
-			external: ['dotenv']
-		}
+		// rollupOptions: {
+		// 	external: ['dotenv']
+		// }
 	},
 }) 
