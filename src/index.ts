@@ -6,52 +6,52 @@ export type Flatten<T> =
 	: T extends object
 	? { [K in keyof T]: Flatten<T[K]>; } : T;
 
-export type DefaultValue<ChainEnv> =
-	string | ChainableEnv<ChainEnv> | ((v: string | undefined, ctx: Omit<Flatten<ChainEnv>, keyof ChainableEnvOperators<Flatten<ChainEnv>>>) => any) | undefined;
+export type DefaultValue<ctx> =
+	string | ChainableEnv<ctx> | ((v: string | undefined, ctx: Omit<Flatten<ctx>, keyof ChainableEnvOperators<Flatten<ctx>>>) => any) | undefined;
 
 type IncludeInChainWithFunction<
-	ChainEnv,
+	ctx,
 	K extends string,
-	V = DefaultValue<ChainEnv>
-> = (K extends keyof ChainEnv ? Omit<ChainEnv, K> : ChainEnv) & {
+	V = DefaultValue<ctx>
+> = (K extends keyof ctx ? Omit<ctx, K> : ctx) & {
 	[k in K]: V extends string ? string
 	: V extends ChainableEnv<infer R> ? ChainableEnv<Flatten<R>>
-	: V extends ((v: string | undefined, ctx: Omit<Flatten<ChainEnv>, keyof ChainableEnvOperators<Flatten<ChainEnv>>>) => infer R) ? R
+	: V extends ((v: string | undefined, ctx: Omit<Flatten<ctx>, keyof ChainableEnvOperators<Flatten<ctx>>>) => infer R) ? R
 	: V extends undefined ? string | undefined
 	: V;
 };
 
-export type AddOperator<ChainEnv> = <
+export type AddOperator<ctx> = <
 	K extends string,
-	V extends DefaultValue<ChainEnv>
+	V extends DefaultValue<ctx>
 >(key: K, defaultValue?: V) =>
 	ChainableEnv<
 		Flatten<
-			IncludeInChainWithFunction<ChainEnv, K, V>
+			IncludeInChainWithFunction<ctx, K, V>
 		>
 	>;
 
 
-export type AliasOperator<ChainEnv> = <
+export type AliasOperator<ctx> = <
 	K extends string,
 	D extends string,
-	V extends DefaultValue<ChainEnv>,
+	V extends DefaultValue<ctx>,
 >(key: K, envVariable: D, defaultValue?: V) =>
 	ChainableEnv<
 		Flatten<
-			IncludeInChainWithFunction<ChainEnv, K, V>
+			IncludeInChainWithFunction<ctx, K, V>
 		>
 	>;
 
 
-export type GroupOperator<ChainEnv> = <
+export type GroupOperator<ctx> = <
 	K extends string,
-	GroupChainEnv,
-	GroupChainableEnv = ChainableEnv<Flatten<GroupChainEnv>>,
+	Groupctx,
+	GroupChainableEnv = ChainableEnv<Flatten<Groupctx>>,
 >(key: K, groupCreateFunction: (envChain: ChainableEnv) => GroupChainableEnv) =>
 	ChainableEnv<
 		Flatten<
-			IncludeInChainWithFunction<ChainEnv, K, GroupChainableEnv>
+			IncludeInChainWithFunction<ctx, K, GroupChainableEnv>
 		>
 	>;
 
@@ -59,39 +59,39 @@ export type InheritConfig = {
 	quiet?: boolean;
 };
 
-export type InheritOperator<ChainEnv> = <
+export type InheritOperator<ctx> = <
 	K extends string,
-	V extends keyof ChainEnv
+	V extends keyof ctx
 >(key: K, from: V, config?: InheritConfig) => ChainableEnv<
 	Flatten<
-		ChainEnv & {
-			[k in K]: ChainEnv[V] | undefined;
+		ctx & {
+			[k in K]: ctx[V] | undefined;
 		}
 	>
 >;
 
-export type RemoveOperator<ChainEnv> = <K extends keyof ChainEnv>(key: K) => ChainableEnv<Flatten<Omit<ChainEnv, K>>>;
+export type RemoveOperator<ctx> = <K extends keyof ctx>(key: K) => ChainableEnv<Flatten<Omit<ctx, K>>>;
 
-export type RenderOperator<ChainEnv> = () => Flatten<ChainEnv>;
+export type RenderOperator<ctx> = () => Flatten<ctx>;
 
-export type CloneOperator<ChainEnv> = () => ChainableEnv<Flatten<ChainEnv>>;
+export type CloneOperator<ctx> = () => ChainableEnv<Flatten<ctx>>;
 
-export type ChainableEnvOperators<ChainEnv = {}> = {
-	readonly add: AddOperator<ChainEnv>;
-	readonly alias: AliasOperator<ChainEnv>;
-	readonly inherit: InheritOperator<ChainEnv>;
-	readonly group: GroupOperator<ChainEnv>;
-	readonly remove: RemoveOperator<ChainEnv>;
-	readonly render: RenderOperator<ChainEnv>;
-	readonly clone: CloneOperator<ChainEnv>;
+export type ChainableEnvOperators<ctx = {}> = {
+	readonly add: AddOperator<ctx>;
+	readonly alias: AliasOperator<ctx>;
+	readonly inherit: InheritOperator<ctx>;
+	readonly group: GroupOperator<ctx>;
+	readonly remove: RemoveOperator<ctx>;
+	readonly render: RenderOperator<ctx>;
+	readonly clone: CloneOperator<ctx>;
 };
 
-export type ChainableEnv<ChainEnv = {}> =
+export type ChainableEnv<ctx = {}> =
 	Omit<
-		Flatten<ChainEnv>, 
-		keyof ChainableEnvOperators<Flatten<ChainEnv>>
+		Flatten<ctx>, 
+		keyof ChainableEnvOperators<Flatten<ctx>>
 	>
-	& ChainableEnvOperators<ChainEnv>;
+	& ChainableEnvOperators<ctx>;
 
 export function envChain(options: Parameters<typeof config>[0] = {
 	path: '.env',
@@ -165,8 +165,8 @@ function freezeOperators(newChain: ChainableEnv<{}>) {
 	});
 }
 
-function addKeyWithDefaultValue<ChainEnv, V>(
-	context: ChainableEnv<ChainEnv>,
+function addKeyWithDefaultValue<ctx, V>(
+	context: ChainableEnv<ctx>,
 	key: string,
 	defaultValue: V | undefined,
 	envKey = key
