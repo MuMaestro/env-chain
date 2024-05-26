@@ -166,7 +166,11 @@ export function envChain(options: Parameters<typeof config>[0] = {
 					if (!descriptor || (descriptor.value === undefined && descriptor.set === undefined)) {
 						return acc;
 					}
+					if (typeof (this as any)[k].render === 'function') {
+						(acc as any)[k] = (this as any)[k]();
+					} else {
 						(acc as any)[k] = (this as any)[k];
+					}
 					return acc;
 				}, {})
 			};
