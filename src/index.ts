@@ -4,9 +4,7 @@ export type Flatten<T> =
 	T extends number
 	? T
 	: T extends object
-	? T extends ChainableEnv<infer R>
-	? ChainableEnv<Flatten<R>>
-	: { [K in keyof T]: Flatten<T[K]>; } : T;
+	? { [K in keyof T]: Flatten<T[K]>; } : T;
 
 export type DefaultValue<ChainEnv> = 
 	string | ChainableEnv<ChainEnv> | ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => any) | undefined;
