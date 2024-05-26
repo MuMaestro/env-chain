@@ -6,8 +6,8 @@ export type Flatten<T> =
 	: T extends object
 	? { [K in keyof T]: Flatten<T[K]>; } : T;
 
-export type DefaultValue<ChainEnv> = 
-	string | ChainableEnv<ChainEnv> | ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => any) | undefined;
+export type DefaultValue<ChainEnv> =
+	string | ChainableEnv<ChainEnv> | ((v: string | undefined, ctx: Omit<Flatten<ChainEnv>, keyof ChainableEnvOperators<Flatten<ChainEnv>>>) => any) | undefined;
 
 type IncludeInChainWithFunction<
 	ChainEnv,
@@ -16,7 +16,7 @@ type IncludeInChainWithFunction<
 > = (K extends keyof ChainEnv ? Omit<ChainEnv, K> : ChainEnv) & {
 	[k in K]: V extends string ? string
 	: V extends ChainableEnv<infer R> ? ChainableEnv<Flatten<R>>
-	: V extends ((v: string | undefined, ctx: ChainEnvWithoutOperators<ChainEnv>) => infer R) ? R
+	: V extends ((v: string | undefined, ctx: Omit<Flatten<ChainEnv>, keyof ChainableEnvOperators<Flatten<ChainEnv>>>) => infer R) ? R
 	: V extends undefined ? string | undefined
 	: V;
 };
@@ -86,8 +86,12 @@ export type ChainableEnvOperators<ChainEnv = {}> = {
 	readonly clone: CloneOperator<ChainEnv>;
 };
 
-export type ChainEnvWithoutOperators<ChainEnv> = Omit<Flatten<ChainEnv>, keyof ChainableEnvOperators<Flatten<ChainEnv>>>;
-export type ChainableEnv<ChainEnv = {}> = ChainEnvWithoutOperators<ChainEnv> & ChainableEnvOperators<ChainEnv>;
+export type ChainableEnv<ChainEnv = {}> =
+	Omit<
+		Flatten<ChainEnv>, 
+		keyof ChainableEnvOperators<Flatten<ChainEnv>>
+	>
+	& ChainableEnvOperators<ChainEnv>;
 
 export function envChain(options: Parameters<typeof config>[0] = {
 	path: '.env',
