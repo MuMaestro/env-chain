@@ -1,10 +1,14 @@
 import { config } from 'dotenv';
 
-export type Flatten<T> =
+export type Flatten<T, Skip = undefined> =
 	T extends number
 	? T
 	: T extends object
-	? { [K in keyof T]: Flatten<T[K]>; } : T;
+	? {
+		[K in keyof T]: K extends keyof Skip
+		? T[K]
+		: Flatten<T[K]>;
+	} : T;
 
 export type DefaultValue<ctx> =
 	string | ChainableEnv<ctx> | ((v: string | undefined, ctx: Omit<Flatten<ctx>, keyof ChainableEnvOperators<Flatten<ctx>>>) => any) | undefined;
