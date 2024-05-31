@@ -247,8 +247,11 @@ describe('envChain', () => {
 
 		test('creates subchain', () => {
 			const chain = env
-				.add('VARIABLE_1', 'test').group('auth', (g) => g.add('VARIABLE_2', 'test'));
-			expect(chain.auth.VARIABLE_2).toBe('variable_2');
+				.add('VARIABLE_1', 'test')
+				.group('auth', (g, ctx) => g.add('VARIABLE_2', 'test').add('VARIABLE_3', ctx.VARIABLE_1));
+			expect(chain.auth.VARIABLE_2).not.toBe('test');
+			expect(chain.auth.VARIABLE_3).toBe('variable_1');
+
 		})
 	})
 })

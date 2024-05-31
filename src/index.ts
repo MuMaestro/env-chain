@@ -61,7 +61,7 @@ export type GroupOperator<ctx> = <
 	Groupctx,
 	GroupChainableEnv = ChainableEnv<Flatten<Groupctx, KeysWhereChainableEnv<Groupctx>>>,
 	CtxAmmended = AmmendInChainCtx<ctx, K, GroupChainableEnv>
->(key: K, groupCreateFunction: (envChain: ChainableEnv) => GroupChainableEnv) =>
+>(key: K, groupCreateFunction: (envChain: ChainableEnv, currentCtx: Flatten<RenderChainCtx<ctx>>) => GroupChainableEnv) =>
 	ChainableEnv<
 		FlattenSkippingChainableEnv<CtxAmmended>
 	>;
@@ -126,7 +126,7 @@ export function envChain(options: Parameters<typeof config>[0] = {
 			return addKeyWithDefaultValue(this, key, defaultValue, envVariable);
 		},
 		group(k, groupCreateFunction) {
-			const groupChain = groupCreateFunction(envChain(options));
+			const groupChain = groupCreateFunction(envChain(options), this);
 			return addPropertyToObject(this, k, {
 				get() {
 					return groupChain;
