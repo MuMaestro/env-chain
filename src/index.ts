@@ -167,7 +167,7 @@ export function envChain(options: Parameters<typeof config>[0] = {
 						return acc;
 					}
 					if (typeof (this as any)[k].render === 'function') {
-						(acc as any)[k] = (this as any)[k]();
+						(acc as any)[k] = (this as any)[k].render();
 					} else {
 						(acc as any)[k] = (this as any)[k];
 					}
