@@ -1,6 +1,6 @@
 {
 	"name": "@mumaestro/env-chain",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"author": "Murilo Augusto Maestro",
 	"description": "A simple chainble environment variable parser",
 	"private": false,
