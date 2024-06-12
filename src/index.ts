@@ -1,4 +1,4 @@
-import { config } from 'dotenv';
+import { DotenvConfigOutput, config } from 'dotenv';
 
 export type Flatten<T, Skip = undefined> =
 	T extends number
@@ -117,13 +117,13 @@ export type ChainableEnv<ctx = {}> =
 export function envChain(options: Parameters<typeof config>[0] = {
 	path: '.env',
 }): ChainableEnv {
-	config(options);
+	const loadedEnv = config(options);
 	const newChain: ChainableEnv<{}> = {
 		add(key, defaultValue) {
-			return addKeyWithDefaultValue(this, key, defaultValue);
+			return addKeyWithDefaultValue(this, loadedEnv, key, defaultValue);
 		},
 		alias(key, envVariable, defaultValue) {
-			return addKeyWithDefaultValue(this, key, defaultValue, envVariable);
+			return addKeyWithDefaultValue(this, loadedEnv, key, defaultValue, envVariable);
 		},
 		group(k, groupCreateFunction) {
 			const groupChain = groupCreateFunction(envChain(options), this);
@@ -192,6 +192,7 @@ function freezeOperators(newChain: ChainableEnv<{}>) {
 
 function addKeyWithDefaultValue<ctx, V>(
 	context: ChainableEnv<ctx>,
+	loadedEnv: DotenvConfigOutput,
 	key: string,
 	defaultValue: V | undefined,
 	envKey = key
@@ -200,13 +201,13 @@ function addKeyWithDefaultValue<ctx, V>(
 	return addPropertyToObject(context, key, {
 		get() {
 			if (typeof internalValue === 'function') {
-				return internalValue(process.env[envKey], this);
+				return internalValue(loadedEnv.parsed?.[envKey], this);
 			}
 			if (internalValue) return internalValue;
 			if (typeof defaultValue === 'function') {
-				return defaultValue(process.env[envKey], this);
+				return defaultValue(loadedEnv.parsed?.[envKey], this);
 			}
-			return process.env[envKey] ?? defaultValue;
+			return loadedEnv.parsed?.[envKey] ?? defaultValue;
 		},
 		set(v: typeof internalValue) {
 			internalValue = v;
