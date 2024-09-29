@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
+      '@dotenvx/dotenvx':
+        specifier: ^1.14.1
+        version: 1.14.1
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -215,6 +215,10 @@ packages:
 
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+
+  '@dotenvx/dotenvx@1.14.1':
+    resolution: {integrity: sha512-uuv4JJxyy2dA1VaoyJpv404tzg+xpShYOy7eMYD7MZTAdO5JMnYlm7x5UZV6jgaHk5w99OTTe17i/R2fOS5jbw==}
+    hasBin: true
 
   '@esbuild/aix-ppc64@0.20.2':
     resolution: {integrity: sha512-D+EBOJHXdNZcLJRBkhENNG8Wji2kgc9AZ9KiPr1JuZjsNtyHzrsfLRrY0tk2H2aoFu6RANO1y1iPPUCDYWkb5g==}
@@ -462,6 +466,18 @@ packages:
 
   '@microsoft/tsdoc@0.14.2':
     resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
+
+  '@noble/ciphers@1.0.0':
+    resolution: {integrity: sha512-wH5EHOmLi0rEazphPbecAzmjd12I6/Yv/SiHdkA9LSycsQk7RuuTp7am5/o62qYr0RScE7Pc9icXGBbsr6cesA==}
+    engines: {node: ^14.21.3 || >=16}
+
+  '@noble/curves@1.6.0':
+    resolution: {integrity: sha512-TlaHRXDehJuRNR9TfZDNQ45mMEd5dwUwmicsafcIX4SsNiqnCHKjE/1alYPd/lDRVhxdhUAlv8uEhMCI5zjIJQ==}
+    engines: {node: ^14.21.3 || >=16}
+
+  '@noble/hashes@1.5.0':
+    resolution: {integrity: sha512-1j6kQFb7QRru7eKN3ZDvRcP13rugwdxZqCjbiAVZfIJwgj2A65UmT4TgARXGlXgnRkORLTDTrO19ZErt7+QXgA==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -804,6 +820,10 @@ packages:
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
 
+  commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
+    engines: {node: '>=16'}
+
   commander@9.5.0:
     resolution: {integrity: sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==}
     engines: {node: ^12.20.0 || >=14}
@@ -864,6 +884,10 @@ packages:
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
+
+  eciesjs@0.4.8:
+    resolution: {integrity: sha512-U2wAn6yEOVBP9lOVh3nryufg3hQTKVicG+qjEfqB/70m/mU9DzwWNdK0mC5zuxlJH42EGAezFlHVWI0snwg1nw==}
+    engines: {node: '>=16.0.0'}
 
   electron-to-chromium@1.4.737:
     resolution: {integrity: sha512-QvLTxaLHKdy5YxvixAw/FfHq2eWLUL9KvsPjp0aHK1gI5d3EDuDgITkvj0nFO2c6zUY3ZqVAJQiBYyQP9tQpfw==}
@@ -930,6 +954,14 @@ packages:
 
   fb-watchman@2.0.2:
     resolution: {integrity: sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA==}
+
+  fdir@6.3.0:
+    resolution: {integrity: sha512-QOnuT+BOtivR77wYvCWHfGt9s4Pz1VIMbD463vegT5MLqNXy8rYFT/lPVEqf/bhYeT6qmqrNHhsX+rWwe3rOCQ==}
+    peerDependencies:
+      picomatch: ^3 || ^4
+    peerDependenciesMeta:
+      picomatch:
+        optional: true
 
   fill-range@7.0.1:
     resolution: {integrity: sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==}
@@ -1015,6 +1047,10 @@ packages:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
 
+  ignore@5.3.2:
+    resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
+    engines: {node: '>= 4'}
+
   import-lazy@4.0.0:
     resolution: {integrity: sha512-rKtvo6a868b5Hu3heneU+L4yEQ4jYKLtjpnPeUdK7h0yzXGmyBTypknlkCvHFBqfX9YlorEiMM6Dnq/5atfHkw==}
     engines: {node: '>=8'}
@@ -1058,6 +1094,10 @@ packages:
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
+
+  isexe@3.1.1:
+    resolution: {integrity: sha512-LpB/54B+/2J5hqQ7imZHfdU31OlgQqx7ZicVlkm9kzg9/w8GKLEcFfJl/t7DCEDueOyBAD6zCCwTO6Fzs0NoEQ==}
+    engines: {node: '>=16'}
 
   istanbul-lib-coverage@3.2.2:
     resolution: {integrity: sha512-O8dpsF+r0WV/8MNRKfnmrtCWhuKjxrq2w+jpzBL5UZKTi2LeVWnWOmWRxFlesJONmc+wLAGvKQZEOanko0LFTg==}
@@ -1361,6 +1401,10 @@ packages:
     resolution: {integrity: sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==}
     engines: {node: '>=8'}
 
+  object-treeify@1.1.33:
+    resolution: {integrity: sha512-EFVjAYfzWqWsBMRHPMAXLCDIJnpMhdWAqR7xG6M6a2cs6PMFpl/+Z20w9zDW4vkxOFfddegBKq9Rehd0bxWE7A==}
+    engines: {node: '>= 10'}
+
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
@@ -1416,6 +1460,10 @@ packages:
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
+
+  picomatch@4.0.2:
+    resolution: {integrity: sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==}
+    engines: {node: '>=12'}
 
   pirates@4.0.6:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
@@ -1732,6 +1780,11 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
+  which@4.0.0:
+    resolution: {integrity: sha512-GlaYyEb07DPxYCKhKzplCWBJtvxZcZMrL+4UkrTSJHHPyZU4mYYTv3qaOe77H7EODLSSopAUFAc6W8U4yqvscg==}
+    engines: {node: ^16.13.0 || >=18.0.0}
+    hasBin: true
+
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}
@@ -1980,6 +2033,18 @@ snapshots:
       to-fast-properties: 2.0.0
 
   '@bcoe/v8-coverage@0.2.3': {}
+
+  '@dotenvx/dotenvx@1.14.1':
+    dependencies:
+      commander: 11.1.0
+      dotenv: 16.4.5
+      eciesjs: 0.4.8
+      execa: 5.1.1
+      fdir: 6.3.0(picomatch@4.0.2)
+      ignore: 5.3.2
+      object-treeify: 1.1.33
+      picomatch: 4.0.2
+      which: 4.0.0
 
   '@esbuild/aix-ppc64@0.20.2':
     optional: true
@@ -2282,6 +2347,14 @@ snapshots:
       resolve: 1.19.0
 
   '@microsoft/tsdoc@0.14.2': {}
+
+  '@noble/ciphers@1.0.0': {}
+
+  '@noble/curves@1.6.0':
+    dependencies:
+      '@noble/hashes': 1.5.0
+
+  '@noble/hashes@1.5.0': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -2644,6 +2717,8 @@ snapshots:
 
   color-name@1.1.4: {}
 
+  commander@11.1.0: {}
+
   commander@9.5.0:
     optional: true
 
@@ -2691,6 +2766,12 @@ snapshots:
   dotenv@16.4.5: {}
 
   eastasianwidth@0.2.0: {}
+
+  eciesjs@0.4.8:
+    dependencies:
+      '@noble/ciphers': 1.0.0
+      '@noble/curves': 1.6.0
+      '@noble/hashes': 1.5.0
 
   electron-to-chromium@1.4.737: {}
 
@@ -2772,6 +2853,10 @@ snapshots:
     dependencies:
       bser: 2.1.1
 
+  fdir@6.3.0(picomatch@4.0.2):
+    optionalDependencies:
+      picomatch: 4.0.2
+
   fill-range@7.0.1:
     dependencies:
       to-regex-range: 5.0.1
@@ -2844,6 +2929,8 @@ snapshots:
 
   human-signals@2.1.0: {}
 
+  ignore@5.3.2: {}
+
   import-lazy@4.0.0: {}
 
   import-local@3.1.0:
@@ -2875,6 +2962,8 @@ snapshots:
   is-stream@2.0.1: {}
 
   isexe@2.0.0: {}
+
+  isexe@3.1.1: {}
 
   istanbul-lib-coverage@3.2.2: {}
 
@@ -3343,6 +3432,8 @@ snapshots:
     dependencies:
       path-key: 3.1.1
 
+  object-treeify@1.1.33: {}
+
   once@1.4.0:
     dependencies:
       wrappy: 1.0.2
@@ -3390,6 +3481,8 @@ snapshots:
   picocolors@1.0.0: {}
 
   picomatch@2.3.1: {}
+
+  picomatch@4.0.2: {}
 
   pirates@4.0.6: {}
 
@@ -3670,6 +3763,10 @@ snapshots:
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
+
+  which@4.0.0:
+    dependencies:
+      isexe: 3.1.1
 
   wrap-ansi@7.0.0:
     dependencies:

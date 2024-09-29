@@ -1,4 +1,4 @@
-import { DotenvConfigOutput, config } from 'dotenv';
+import { DotenvConfigOutput, config, decrypt } from '@dotenvx/dotenvx';
 
 export type Flatten<T, Skip = undefined> =
 	T extends number

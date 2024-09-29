@@ -19,10 +19,10 @@
 		"build:clean": "rm -rf ./build",
 		"build": "pnpm build:clean && pnpm build:tscompile",
 		"prepublish": "pnpm build",
-		"test": "jest"
+		"test": "dotenvx run -- jest"
 	},
 	"dependencies": {
-		"dotenv": "^16.4.5"
+		"@dotenvx/dotenvx": "^1.14.1"
 	},
 	"devDependencies": {
 		"@jest/globals": "^29.7.0",
