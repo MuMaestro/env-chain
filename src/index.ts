@@ -114,9 +114,7 @@ export type ChainableEnv<ctx = {}> =
 	ctx
 	& ChainableEnvOperators<ctx>;
 
-export function envChain(options: Parameters<typeof config>[0] = {
-	path: '.env',
-}): ChainableEnv {
+export function envChain(options?: Parameters<typeof config>[0]): ChainableEnv {
 	const loadedEnv = config(options);
 	const newChain: ChainableEnv<{}> = {
 		add(key, defaultValue) {
