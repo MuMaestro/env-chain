@@ -115,7 +115,8 @@ export type ChainableEnv<ctx = {}> =
 	& ChainableEnvOperators<ctx>;
 
 export function envChain(options?: Parameters<typeof config>[0]): ChainableEnv {
-	const loadedEnv = config(options);
+	const loadedEnvFile = config(options);
+	const loadedEnv = { ...loadedEnvFile.parsed, ...process.env };
 	const newChain: ChainableEnv<{}> = {
 		add(key, defaultValue) {
 			return addKeyWithDefaultValue(this, loadedEnv, key, defaultValue);
@@ -190,7 +191,7 @@ function freezeOperators(newChain: ChainableEnv<{}>) {
 
 function addKeyWithDefaultValue<ctx, V>(
 	context: ChainableEnv<ctx>,
-	loadedEnv: DotenvConfigOutput,
+	loadedEnv: Record<string, any>,
 	key: string,
 	defaultValue: V | undefined,
 	envKey = key
@@ -199,13 +200,13 @@ function addKeyWithDefaultValue<ctx, V>(
 	return addPropertyToObject(context, key, {
 		get() {
 			if (typeof internalValue === 'function') {
-				return internalValue(loadedEnv.parsed?.[envKey], this);
+				return internalValue(loadedEnv?.[envKey], this);
 			}
 			if (internalValue) return internalValue;
 			if (typeof defaultValue === 'function') {
-				return defaultValue(loadedEnv.parsed?.[envKey], this);
+				return defaultValue(loadedEnv?.[envKey], this);
 			}
-			return loadedEnv.parsed?.[envKey] ?? defaultValue;
+			return loadedEnv?.[envKey] ?? defaultValue;
 		},
 		set(v: typeof internalValue) {
 			internalValue = v;
