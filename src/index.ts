@@ -1,4 +1,13 @@
-import { DotenvConfigOutput, config, decrypt } from '@dotenvx/dotenvx';
+import type { config as dotenvxConfig } from '@dotenvx/dotenvx';
+
+type DotenvxConfigOptions = Parameters<typeof dotenvxConfig>[0];
+
+export type EnvChainOptions = {
+	// Runtime env source, useful for browser/Next client-side usage.
+	env?: Record<string, any>;
+	// Disable dotenvx loading in Node environments.
+	disableDotenvx?: boolean;
+} & DotenvxConfigOptions;
 
 export type Flatten<T, Skip = undefined> =
 	T extends number
@@ -114,9 +123,12 @@ export type ChainableEnv<ctx = {}> =
 	ctx
 	& ChainableEnvOperators<ctx>;
 
-export function envChain(options?: Parameters<typeof config>[0]): ChainableEnv {
-	const loadedEnvFile = config(options);
-	const loadedEnv = { ...loadedEnvFile.parsed, ...process.env };
+export function envChain(options?: EnvChainOptions): ChainableEnv {
+	const loadedEnv = {
+		...readDotenvxEnv(options),
+		...readRuntimeProcessEnv(),
+		...(options?.env ?? {}),
+	};
 	const newChain: ChainableEnv<{}> = {
 		add(key, defaultValue) {
 			return addKeyWithDefaultValue(this, loadedEnv, key, defaultValue);
@@ -181,6 +193,35 @@ export function envChain(options?: Parameters<typeof config>[0]): ChainableEnv {
 	} as ChainableEnv;
 	freezeOperators(newChain);
 	return newChain;
+}
+
+function readDotenvxEnv(options?: EnvChainOptions) {
+	if (options?.disableDotenvx || isNodeRuntime() === false) {
+		return {};
+	}
+
+	try {
+		const runtimeRequire = eval('require');
+		const dotenvx = runtimeRequire('@dotenvx/dotenvx') as {
+			config: (opts?: DotenvxConfigOptions) => { parsed?: Record<string, any> };
+		};
+		return dotenvx.config(options)?.parsed ?? {};
+	} catch {
+		return {};
+	}
+}
+
+function readRuntimeProcessEnv() {
+	const runtimeProcess = (globalThis as any)?.['process'];
+	if (!runtimeProcess?.env || typeof runtimeProcess.env !== 'object') {
+		return {};
+	}
+	return runtimeProcess.env as Record<string, any>;
+}
+
+function isNodeRuntime() {
+	const runtimeProcess = (globalThis as any)?.['process'];
+	return Boolean(runtimeProcess?.versions?.node);
 }
 
 function freezeOperators(newChain: ChainableEnv<{}>) {

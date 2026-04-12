@@ -1,9 +1,44 @@
 import { envChain } from '../src/index';
-import { beforeEach, describe, expect, test } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, test } from '@jest/globals';
 
-const validEnvConfig = { path: 'test/.env.example' };
+const validEnvConfig = { path: 'test/.env.example', quiet: true, debug: false };
 
 describe('envChain', () => {
+	describe('build time vs runtime', () => {
+		const targetKey = 'NEXT_PUBLIC_RUNTIME_DIFF_TEST';
+		const previousValue = process.env[targetKey];
+
+		afterEach(() => {
+			if (previousValue === undefined) {
+				delete process.env[targetKey];
+				return;
+			}
+			process.env[targetKey] = previousValue;
+		});
+
+		test('prefers build-time injected env, while runtime chain reads process.env', () => {
+			process.env[targetKey] = 'runtime-value';
+
+			const buildTimeChain = envChain({
+				disableDotenvx: true,
+				debug: false,
+				quiet: true,
+				env: {
+					[targetKey]: 'build-time-value',
+				},
+			}).add(targetKey);
+
+			const runtimeChain = envChain({
+				disableDotenvx: true,
+				debug: false,
+				quiet: true,
+			}).add(targetKey);
+
+			expect(buildTimeChain[targetKey]).toBe('build-time-value');
+			expect(runtimeChain[targetKey]).toBe('runtime-value');
+		});
+	});
+
 	describe('populates process.env', () => {
 		let env = envChain(validEnvConfig);
 
