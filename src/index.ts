@@ -109,6 +109,8 @@ export type CloneOperator<ctx> = () => ChainableEnv<
 	Flatten<ctx, KeysWhereChainableEnv<ctx>>
 >;
 
+export type ValidateOperator<ctx> = () => ChainableEnv<ctx>;
+
 export type ChainableEnvOperators<ctx = {}> = {
 	readonly add: AddOperator<ctx>;
 	readonly alias: AliasOperator<ctx>;
@@ -117,6 +119,7 @@ export type ChainableEnvOperators<ctx = {}> = {
 	readonly remove: RemoveOperator<ctx>;
 	readonly render: RenderOperator<ctx>;
 	readonly clone: CloneOperator<ctx>;
+	readonly validate: ValidateOperator<ctx>;
 };
 
 export type ChainableEnv<ctx = {}> =
@@ -189,6 +192,13 @@ export function envChain(options?: EnvChainOptions): ChainableEnv {
 		clone() {
 			const newChain = envChain(options)
 			return Object.assign(newChain, this);
+		},
+		validate() {
+			const missing = Object.keys(this).filter((k) => (this as any)[k] === undefined);
+			if (missing.length > 0) {
+				throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+			}
+			return this;
 		},
 	} as ChainableEnv;
 	freezeOperators(newChain);
