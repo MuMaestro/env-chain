@@ -3,6 +3,9 @@ import { afterEach, beforeEach, describe, expect, test } from '@jest/globals';
 
 const validEnvConfig = { path: 'test/.env.example', quiet: true, debug: false };
 
+let _uniqueCounter = 0;
+const uniqueKey = (prefix: string) => `${prefix}_${++_uniqueCounter}`;
+
 describe('envChain', () => {
 	describe('build time vs runtime', () => {
 		const targetKey = 'NEXT_PUBLIC_RUNTIME_DIFF_TEST';
@@ -272,6 +275,147 @@ describe('envChain', () => {
 			expect((chain as any).VARIABLE_2).not.toBeDefined();
 		})
 	})
+
+	describe('build time validation', () => {
+		test('reads encrypted variables from dotenvx env file', () => {
+			const chain = envChain(validEnvConfig).add('VARIABLE_1').add('VARIABLE_2');
+			expect(chain.VARIABLE_1).toBe('variable_1');
+			expect(chain.VARIABLE_2).toBe('variable_2');
+		});
+
+		test('build-time env option takes precedence over process.env', () => {
+			const key = uniqueKey('BUILD_PRECEDENCE_TEST');
+			process.env[key] = 'runtime-value';
+			try {
+				const chain = envChain({
+					disableDotenvx: true,
+					env: { [key]: 'build-time-value' },
+				}).add(key);
+				expect(chain[key]).toBe('build-time-value');
+			} finally {
+				delete process.env[key];
+			}
+		});
+
+		test('build-time env option takes precedence over dotenvx loaded variables', () => {
+			const chain = envChain({
+				...validEnvConfig,
+				env: { VARIABLE_1: 'overridden-at-build-time' },
+			}).add('VARIABLE_1');
+			expect(chain.VARIABLE_1).toBe('overridden-at-build-time');
+		});
+
+		test('default value is used when variable is absent from env', () => {
+			const chain = envChain({ disableDotenvx: true }).add('ABSENT_VAR', 'my-default');
+			expect(chain.ABSENT_VAR).toBe('my-default');
+		});
+
+		test('default function receives the raw env value and current context', () => {
+			const chain = envChain({ disableDotenvx: true, env: { RAW_VAR: 'raw' } })
+				.add('RAW_VAR', (v, ctx) => `processed:${v}`);
+			expect(chain.RAW_VAR).toBe('processed:raw');
+		});
+	});
+
+	describe('secret isolation (build-time env must not leak)', () => {
+		test('build-time env secrets do not appear in process.env', () => {
+			const secretKey = uniqueKey('BT_SECRET');
+			envChain({ disableDotenvx: true, env: { [secretKey]: 'secret-value' } }).add(secretKey);
+			expect(process.env[secretKey]).toBeUndefined();
+		});
+
+		test('build-time env secrets are not accessible from an independent runtime chain', () => {
+			const secretKey = uniqueKey('BT_SECRET_CHAIN');
+			envChain({ disableDotenvx: true, env: { [secretKey]: 'secret-value' } }).add(secretKey);
+			const runtimeChain = envChain({ disableDotenvx: true }).add(secretKey);
+			expect(runtimeChain[secretKey]).toBeUndefined();
+		});
+
+		test('two build-time chains with different secrets do not share values', () => {
+			const key1 = uniqueKey('BT_SECRET_A');
+			const key2 = uniqueKey('BT_SECRET_B');
+			const chainA = envChain({ disableDotenvx: true, env: { [key1]: 'secret-a' } }).add(key1).add(key2);
+			const chainB = envChain({ disableDotenvx: true, env: { [key2]: 'secret-b' } }).add(key1).add(key2);
+			expect(chainA[key1]).toBe('secret-a');
+			expect(chainA[key2]).toBeUndefined();
+			expect(chainB[key1]).toBeUndefined();
+			expect(chainB[key2]).toBe('secret-b');
+		});
+
+		test('dotenvx loaded variables are reflected in process.env', () => {
+			envChain(validEnvConfig);
+			expect(process.env['VARIABLE_1']).toBeDefined();
+			expect(process.env['VARIABLE_2']).toBeDefined();
+		});
+
+		test('rendered output excludes operator methods', () => {
+			const chain = envChain({ disableDotenvx: true, env: { SAFE_VAR: 'value' } }).add('SAFE_VAR');
+			const rendered = chain.render();
+			expect((rendered as any).add).toBeUndefined();
+			expect((rendered as any).validate).toBeUndefined();
+			expect((rendered as any).render).toBeUndefined();
+		});
+	});
+
+	describe('validate', () => {
+		test('throws when a required variable is missing', () => {
+			const chain = envChain({ disableDotenvx: true }).add('MISSING_REQUIRED');
+			expect(() => chain.validate()).toThrow(/MISSING_REQUIRED/);
+		});
+
+		test('throws listing all missing variables', () => {
+			const chain = envChain({ disableDotenvx: true })
+				.add('MISSING_A')
+				.add('MISSING_B');
+			expect(() => chain.validate()).toThrow(/MISSING_A/);
+			expect(() => chain.validate()).toThrow(/MISSING_B/);
+		});
+
+		test('does not throw when all variables are defined via env option', () => {
+			const chain = envChain({ disableDotenvx: true, env: { PRESENT_VAR: 'value' } })
+				.add('PRESENT_VAR');
+			expect(() => chain.validate()).not.toThrow();
+		});
+
+		test('does not throw when all variables have string defaults', () => {
+			const chain = envChain({ disableDotenvx: true })
+				.add('VAR_WITH_DEFAULT', 'fallback');
+			expect(() => chain.validate()).not.toThrow();
+		});
+
+		test('does not throw when all variables have function defaults returning a value', () => {
+			const chain = envChain({ disableDotenvx: true })
+				.add('VAR_WITH_FN_DEFAULT', () => 'computed');
+			expect(() => chain.validate()).not.toThrow();
+		});
+
+		test('throws when a function default returns undefined', () => {
+			const chain = envChain({ disableDotenvx: true })
+				.add('VAR_FN_UNDEF', () => undefined);
+			expect(() => chain.validate()).toThrow(/VAR_FN_UNDEF/);
+		});
+
+		test('returns the chain itself when validation passes (chainable)', () => {
+			const chain = envChain({ disableDotenvx: true, env: { CHAIN_VAR: 'v' } })
+				.add('CHAIN_VAR');
+			const result = chain.validate();
+			expect(result).toBe(chain);
+		});
+
+		test('can call render after validate', () => {
+			const chain = envChain({ disableDotenvx: true, env: { RENDER_VAR: 'val' } })
+				.add('RENDER_VAR')
+				.validate();
+			expect(chain.render()).toEqual({ RENDER_VAR: 'val' });
+		});
+
+		test('validate is not included in render output', () => {
+			const chain = envChain({ disableDotenvx: true, env: { SOME_VAR: 'val' } })
+				.add('SOME_VAR');
+			const rendered = chain.render();
+			expect((rendered as any).validate).toBeUndefined();
+		});
+	});
 
 	describe('group', () => {
 		let env = envChain(validEnvConfig);
