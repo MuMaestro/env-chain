@@ -3,6 +3,9 @@ import { afterEach, beforeEach, describe, expect, test } from '@jest/globals';
 
 const validEnvConfig = { path: 'test/.env.example', quiet: true, debug: false };
 
+let _uniqueCounter = 0;
+const uniqueKey = (prefix: string) => `${prefix}_${++_uniqueCounter}`;
+
 describe('envChain', () => {
 	describe('build time vs runtime', () => {
 		const targetKey = 'NEXT_PUBLIC_RUNTIME_DIFF_TEST';
@@ -281,7 +284,7 @@ describe('envChain', () => {
 		});
 
 		test('build-time env option takes precedence over process.env', () => {
-			const key = 'BUILD_PRECEDENCE_TEST_' + Date.now();
+			const key = uniqueKey('BUILD_PRECEDENCE_TEST');
 			process.env[key] = 'runtime-value';
 			try {
 				const chain = envChain({
@@ -316,21 +319,21 @@ describe('envChain', () => {
 
 	describe('secret isolation (build-time env must not leak)', () => {
 		test('build-time env secrets do not appear in process.env', () => {
-			const secretKey = 'BT_SECRET_' + Date.now();
+			const secretKey = uniqueKey('BT_SECRET');
 			envChain({ disableDotenvx: true, env: { [secretKey]: 'secret-value' } }).add(secretKey);
 			expect(process.env[secretKey]).toBeUndefined();
 		});
 
 		test('build-time env secrets are not accessible from an independent runtime chain', () => {
-			const secretKey = 'BT_SECRET_CHAIN_' + Date.now();
+			const secretKey = uniqueKey('BT_SECRET_CHAIN');
 			envChain({ disableDotenvx: true, env: { [secretKey]: 'secret-value' } }).add(secretKey);
 			const runtimeChain = envChain({ disableDotenvx: true }).add(secretKey);
 			expect(runtimeChain[secretKey]).toBeUndefined();
 		});
 
 		test('two build-time chains with different secrets do not share values', () => {
-			const key1 = 'BT_SECRET_A_' + Date.now();
-			const key2 = 'BT_SECRET_B_' + Date.now();
+			const key1 = uniqueKey('BT_SECRET_A');
+			const key2 = uniqueKey('BT_SECRET_B');
 			const chainA = envChain({ disableDotenvx: true, env: { [key1]: 'secret-a' } }).add(key1).add(key2);
 			const chainB = envChain({ disableDotenvx: true, env: { [key2]: 'secret-b' } }).add(key1).add(key2);
 			expect(chainA[key1]).toBe('secret-a');

@@ -194,6 +194,8 @@ export function envChain(options?: EnvChainOptions): ChainableEnv {
 			return Object.assign(newChain, this);
 		},
 		validate() {
+			// Operators are frozen as non-enumerable by freezeOperators(), so Object.keys
+			// only iterates user-added environment variable keys.
 			const missing = Object.keys(this).filter((k) => (this as any)[k] === undefined);
 			if (missing.length > 0) {
 				throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
